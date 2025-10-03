@@ -1,0 +1,16 @@
+// Complex system with multiple dams
+river blue_river = 20;
+river red_river = 18;
+river green_river = 22;
+
+blue_river -> blue_dam;
+red_river -> red_dam;
+
+combine main_river = blue_dam + red_dam;
+
+main_river -> main_dam;
+green_river -> main_dam;
+
+combine final_river = main_dam + green_river;
+
+output final_river;

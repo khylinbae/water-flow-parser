@@ -1,0 +1,18 @@
+// Canberra River System
+river googong = 10;
+river jerrabombarra = 8;
+river upper_molongolo = 12;
+
+googong -> dam1;
+jerrabombarra -> central_molongolo;
+upper_molongolo -> central_molongolo;
+
+dam1 -> queanbeyan;
+queanbeyan -> central_molongolo;
+
+combine central_molongolo = queanbeyan + upper_molongolo + jerrabombarra;
+
+central_molongolo -> dam2;
+dam2 -> lower_molongolo;
+
+output lower_molongolo;

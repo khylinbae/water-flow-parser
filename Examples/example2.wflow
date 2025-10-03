@@ -1,0 +1,12 @@
+// Simple two-river system
+river north_fork = 15;
+river south_fork = 12;
+
+north_fork -> confluence;
+south_fork -> confluence;
+
+combine confluence = north_fork + south_fork;
+
+confluence -> main_river;
+
+output main_river;
