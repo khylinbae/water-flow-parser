@@ -26,6 +26,7 @@ public class Parser {
       if (match(TokenType.RIVER)) return riverDeclaration();
       if (match(TokenType.OUTPUT)) return outputDeclaration();
       if (match(TokenType.COMBINE)) return combineDeclaration();
+      if (match(TokenType.FLOW)) return flowDeclaration();
       if (check(TokenType.IDENTIFIER) && checkNext(TokenType.ARROW)) {
         return flowDeclaration();
       }
@@ -258,6 +259,7 @@ public class Parser {
         case RIVER:
         case OUTPUT:
         case COMBINE:
+        case FLOW:
           return;
       }
 
