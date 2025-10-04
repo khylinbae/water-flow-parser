@@ -1,4 +1,4 @@
-// Simple two-river system
+// Simple two river system
 river north_fork = 15;
 river south_fork = 12;
 

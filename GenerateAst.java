@@ -76,10 +76,10 @@ public class GenerateAst {
         writer.println("  public static class " + className + " extends " +
             baseName + " {");
 
-        // Constructor.
+        // constructor
         writer.println("    public " + className + "(" + fieldList + ") {");
 
-        // Store parameters in fields.
+        // store parameters -> fields
         String[] fields = fieldList.split(", ");
         for (String field : fields) {
             String name = field.split(" ")[1];
@@ -88,14 +88,14 @@ public class GenerateAst {
 
         writer.println("    }");
 
-        // Visitor pattern.
+        // visitor p
         writer.println();
         writer.println("    @Override");
         writer.println("    public <R> R accept(Visitor<R> visitor) {");
         writer.println("      return visitor.visit" + className + baseName + "(this);");
         writer.println("    }");
 
-        // Fields.
+        // feilds
         writer.println();
         for (String field : fields) {
             writer.println("    public final " + field + ";");

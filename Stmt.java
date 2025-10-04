@@ -66,7 +66,7 @@ public abstract class Stmt {
     public final Expr initializer;
   }
 
-  // Waterflow language statements
+  // Wflow language statements
   public static class River extends Stmt {
     public River(Token name, Expr flowRate) {
       this.name = name;
