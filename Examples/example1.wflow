@@ -4,15 +4,20 @@ river jerrabombarra = 8;
 river upper_molongolo = 12;
 
 googong -> dam1;
+dam dam1 adjust 0.50;
 jerrabombarra -> central_molongolo;
 upper_molongolo -> central_molongolo;
 
 dam1 -> queanbeyan;
+dam queanbeyan open;
 queanbeyan -> central_molongolo;
 
 combine central_molongolo = queanbeyan + upper_molongolo + jerrabombarra;
 
+dam central_molongolo adjust 1.10; // boost the flow by 10%
+
 central_molongolo -> dam2;
+dam dam2 close;
 dam2 -> lower_molongolo;
 
 output lower_molongolo;

@@ -6,7 +6,9 @@ north_fork -> confluence;
 south_fork -> confluence;
 
 combine confluence = north_fork + south_fork;
+dam confluence adjust 0.75; // reduce flow for maintenance
 
 confluence -> main_river;
+dam main_river open;
 
 output main_river;
