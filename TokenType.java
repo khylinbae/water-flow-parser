@@ -15,7 +15,7 @@ public enum TokenType {
   // Keywords
   AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
   PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE,
-  RIVER, OUTPUT, COMBINE, FLOW,
+  RIVER, OUTPUT, COMBINE, FLOW, DAM, OPEN, CLOSE, ADJUST,
 
   //yay done
   EOF

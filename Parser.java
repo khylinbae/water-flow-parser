@@ -26,6 +26,7 @@ public class Parser {
       if (match(TokenType.RIVER)) return riverDeclaration();
       if (match(TokenType.OUTPUT)) return outputDeclaration();
       if (match(TokenType.COMBINE)) return combineDeclaration();
+      if (match(TokenType.DAM)) return damDeclaration();
       if (check(TokenType.IDENTIFIER) && checkNext(TokenType.ARROW)) {
         return flowDeclaration();
       }
@@ -75,6 +76,29 @@ public class Parser {
     Token to = consume(TokenType.IDENTIFIER, "Expect destination river name.");
     consume(TokenType.SEMICOLON, "Expect ';' after flow declaration.");
     return new Stmt.Flow(from, to);
+  }
+
+  private Stmt damDeclaration() {
+    Token riverName = consume(TokenType.IDENTIFIER, "Expect river name after 'dam'.");
+
+    Token mode;
+    if (match(TokenType.OPEN)) {
+      mode = previous();
+    } else if (match(TokenType.CLOSE)) {
+      mode = previous();
+    } else if (match(TokenType.ADJUST)) {
+      mode = previous();
+    } else {
+      throw error(peek(), "Expect dam mode (open, close, adjust).");
+    }
+
+    Expr adjustment = null;
+    if (mode.type == TokenType.ADJUST) {
+      adjustment = expression();
+    }
+
+    consume(TokenType.SEMICOLON, "Expect ';' after dam declaration.");
+    return new Stmt.Dam(riverName, mode, adjustment);
   }
 
   private Stmt statement() {
@@ -258,6 +282,7 @@ public class Parser {
         case RIVER:
         case OUTPUT:
         case COMBINE:
+        case DAM:
           return;
       }
 

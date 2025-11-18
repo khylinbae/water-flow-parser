@@ -8,12 +8,22 @@ import java.util.List;
 
 public class Lox {
     static boolean hadError = false;
+    static boolean hadRuntimeError = false;
+    private static double rainfallMm = 1.0;
 
     public static void main(String[] args) throws IOException {
-        if (args.length > 1) {
-            System.out.println("Usage: jlox [script]");
+        if (args.length > 2) {
+            System.out.println("Usage: jlox [script] [rainfallMm]");
             System.exit(64);
-        } else if (args.length == 1) {
+        } else if (args.length >= 1) {
+            if (args.length == 2) {
+                try {
+                    rainfallMm = Double.parseDouble(args[1]);
+                } catch (NumberFormatException ex) {
+                    System.out.println("Rainfall must be a number.");
+                    System.exit(64);
+                }
+            }
             runFile(args[0]);
         } else {
             runPrompt();
@@ -25,6 +35,7 @@ public class Lox {
         run(new String(bytes, StandardCharsets.UTF_8));
 
         if (hadError) System.exit(65);
+        if (hadRuntimeError) System.exit(70);
     }
 
     private static void runPrompt() throws IOException {
@@ -37,6 +48,7 @@ public class Lox {
             if (line == null) break;
             run(line);
             hadError = false;
+            hadRuntimeError = false;
         }
     }
 
@@ -49,10 +61,8 @@ public class Lox {
 
         if (hadError) return;
 
-        AstPrinter printer = new AstPrinter();
-        for (Stmt statement : statements) {
-            System.out.println(printer.print(statement));
-        }
+        Interpreter interpreter = new Interpreter(rainfallMm);
+        interpreter.interpret(statements);
     }
 
     static void error(int line, String message) {
@@ -70,5 +80,10 @@ public class Lox {
     private static void report(int line, String where, String message) {
         System.err.println("[line " + line + "] Error" + where + ": " + message);
         hadError = true;
+    }
+
+    static void runtimeError(RuntimeError error) {
+        System.err.println(error.getMessage() + "\n[line " + error.token.line + "]");
+        hadRuntimeError = true;
     }
 }

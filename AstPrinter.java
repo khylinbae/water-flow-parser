@@ -40,6 +40,14 @@ public class AstPrinter implements Expr.Visitor<String>, Stmt.Visitor<String> {
   }
 
   @Override
+  public String visitDamStmt(Stmt.Dam stmt) {
+    if (stmt.mode.type == TokenType.ADJUST && stmt.adjustment != null) {
+      return "(dam " + stmt.riverName.lexeme + " adjust " + print(stmt.adjustment) + ")";
+    }
+    return "(dam " + stmt.riverName.lexeme + " " + stmt.mode.lexeme + ")";
+  }
+
+  @Override
   public String visitBlockStmt(Stmt.Block stmt) {
     StringBuilder builder = new StringBuilder();
     builder.append("(block ");

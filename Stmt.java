@@ -10,6 +10,7 @@ public abstract class Stmt {
     R visitOutputStmt(Output stmt);
     R visitCombineStmt(Combine stmt);
     R visitFlowStmt(Flow stmt);
+    R visitDamStmt(Dam stmt);
   }
 
   public static class Block extends Stmt {
@@ -123,6 +124,23 @@ public abstract class Stmt {
 
     public final Token from;
     public final Token to;
+  }
+
+  public static class Dam extends Stmt {
+    public Dam(Token riverName, Token mode, Expr adjustment) {
+      this.riverName = riverName;
+      this.mode = mode;
+      this.adjustment = adjustment;
+    }
+
+    @Override
+    public <R> R accept(Visitor<R> visitor) {
+      return visitor.visitDamStmt(this);
+    }
+
+    public final Token riverName;
+    public final Token mode;
+    public final Expr adjustment;
   }
 
   public abstract <R> R accept(Visitor<R> visitor);

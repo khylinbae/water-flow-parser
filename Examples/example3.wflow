@@ -4,13 +4,18 @@ river red_river = 18;
 river green_river = 22;
 
 blue_river -> blue_dam;
+dam blue_dam adjust 1.25; // spillway adds extra push
 red_river -> red_dam;
+dam red_dam adjust 0.40; // restricted release
 
 combine main_river = blue_dam + red_dam;
 
 main_river -> main_dam;
 green_river -> main_dam;
+dam main_dam close;
 
 combine final_river = main_dam + green_river;
+
+dam final_river open;
 
 output final_river;

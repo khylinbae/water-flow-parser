@@ -36,6 +36,10 @@ public class Scanner {
         keywords.put("output", TokenType.OUTPUT);
         keywords.put("combine", TokenType.COMBINE);
         keywords.put("flow", TokenType.FLOW);
+        keywords.put("dam", TokenType.DAM);
+        keywords.put("open", TokenType.OPEN);
+        keywords.put("close", TokenType.CLOSE);
+        keywords.put("adjust", TokenType.ADJUST);
     }
 
     public Scanner(String source) {
