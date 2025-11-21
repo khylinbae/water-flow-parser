@@ -16,6 +16,30 @@ If you do not pass a rainfall argument the interpreter injects a global `rainfal
 variable with the default value `1.0`. Programs can refer to `rainfall` inside
 expressions when declaring rivers or dams.
 
+### Step-by-step setup and execution
+
+1. **Install Java** (JDK 8+). Any recent OpenJDK should work since the project is
+   plain Java.
+2. **Navigate to the repo root**:
+   ```bash
+   cd /workspace/water-flow-parser
+   ```
+3. **Compile** all sources (produces `.class` files in the same directory):
+   ```bash
+   javac *.java
+   ```
+4. **Run a sample program**. You can omit the rainfall argument to use the
+   default `1.0` mm or supply a value (in mm) as the second argument:
+   ```bash
+   java Lox Examples/example1.wflow       # uses 1.0 mm rainfall
+   java Lox Examples/example2.wflow 2.5   # overrides rainfall to 2.5 mm
+   ```
+5. **Inspect the output**:
+   - Any `output` or `print` statements display immediately while the program
+     executes.
+   - A final summary lists each river’s flow and the applied dam factors to help
+     you verify the program behavior.
+
 ## Language overview
 
 The language now executes the AST instead of only printing it. Each program
