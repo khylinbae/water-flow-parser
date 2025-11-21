@@ -4,16 +4,19 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Lox {
     static boolean hadError = false;
     static boolean hadRuntimeError = false;
     private static double rainfallMm = 1.0;
+    private static int days = 1;
 
     public static void main(String[] args) throws IOException {
-        if (args.length > 2) {
-            System.out.println("Usage: jlox [script] [rainfallMm]");
+        if (args.length > 3) {
+            System.out.println("Usage: jlox [script] [days] [rainfallMm]");
             System.exit(64);
         } else if (args.length >= 1) {
             if (args.length == 2) {
@@ -21,6 +24,17 @@ public class Lox {
                     rainfallMm = Double.parseDouble(args[1]);
                 } catch (NumberFormatException ex) {
                     System.out.println("Rainfall must be a number.");
+                    System.exit(64);
+                }
+            } else if (args.length == 3) {
+                try {
+                    days = Integer.parseInt(args[1]);
+                    rainfallMm = Double.parseDouble(args[2]);
+                    if (days < 1) {
+                        throw new NumberFormatException("Days must be positive.");
+                    }
+                } catch (NumberFormatException ex) {
+                    System.out.println("Usage: jlox [script] [days] [rainfallMm]");
                     System.exit(64);
                 }
             }
@@ -61,8 +75,12 @@ public class Lox {
 
         if (hadError) return;
 
-        Interpreter interpreter = new Interpreter(rainfallMm);
-        interpreter.interpret(statements);
+        Map<String, Interpreter.RiverState> sharedRivers = new LinkedHashMap<>();
+        for (int day = 1; day <= days; day++) {
+            Interpreter interpreter = new Interpreter(rainfallMm, day, days, sharedRivers);
+            interpreter.interpret(statements);
+            if (hadRuntimeError) break;
+        }
     }
 
     static void error(int line, String message) {

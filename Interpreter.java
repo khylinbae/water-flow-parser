@@ -5,22 +5,36 @@ import java.util.Map;
 public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     private final Environment globals = new Environment();
     private Environment environment = globals;
-    private final Map<String, RiverState> rivers = new LinkedHashMap<>();
+    private final Map<String, RiverState> rivers;
     private final double rainfallMm;
+    private final int dayNumber;
+    private final int totalDays;
 
-    public Interpreter(double rainfallMm) {
+    public Interpreter(double rainfallMm, int dayNumber, int totalDays, Map<String, RiverState> sharedRivers) {
         this.rainfallMm = rainfallMm;
+        this.dayNumber = dayNumber;
+        this.totalDays = totalDays;
+        this.rivers = sharedRivers == null ? new LinkedHashMap<>() : sharedRivers;
         globals.define("rainfall", rainfallMm);
+        globals.define("day", (double) dayNumber);
+        resetRiversForDay();
     }
 
     public void interpret(List<Stmt> statements) {
         try {
+            System.out.printf("\n=== Day %d of %d with %.1f mm rainfall ===%n", dayNumber, totalDays, rainfallMm);
             for (Stmt statement : statements) {
                 execute(statement);
             }
             printRiverSummary();
         } catch (RuntimeError error) {
             Lox.runtimeError(error);
+        }
+    }
+
+    private void resetRiversForDay() {
+        for (RiverState state : rivers.values()) {
+            state.startDay();
         }
     }
 
@@ -110,6 +124,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
     @Override
     public Void visitDamStmt(Stmt.Dam stmt) {
         RiverState state = getRiverState(stmt.riverName.lexeme);
+        double inflow = state.inflow();
         double factor;
         switch (stmt.mode.type) {
             case OPEN:
@@ -119,7 +134,7 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
                 factor = 0.0;
                 break;
             case ADJUST:
-                factor = requireNumber(stmt.adjustment, stmt.mode);
+                factor = evaluateDamAdjustment(stmt.adjustment, inflow, state.damLevel, stmt);
                 break;
             default:
                 throw new RuntimeError(stmt.mode, "Unsupported dam mode.");
@@ -128,8 +143,23 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             throw new RuntimeError(stmt.mode, "Dam factor cannot be negative.");
         }
         state.setDamFactor(factor);
+        double outflow = inflow * factor;
+        state.updateDamLevel(rainfallMm + inflow - outflow);
         rivers.putIfAbsent(stmt.riverName.lexeme, state);
         return null;
+    }
+
+    private double evaluateDamAdjustment(Expr adjustment, double inflow, double damLevel, Stmt.Dam stmt) {
+        Environment previous = environment;
+        Environment damEnv = new Environment(environment);
+        damEnv.define("inflow", inflow);
+        damEnv.define("damLevel", damLevel);
+        environment = damEnv;
+        try {
+            return requireNumber(adjustment, stmt.mode);
+        } finally {
+            environment = previous;
+        }
     }
 
     @Override
@@ -275,21 +305,28 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             return;
         }
         System.out.println();
-        System.out.printf("== Final river flows with %.1f mm rainfall ==%n", rainfallMm);
+        System.out.printf("== River flows after day %d ==%n", dayNumber);
         for (Map.Entry<String, RiverState> entry : rivers.entrySet()) {
             RiverState state = entry.getValue();
-            System.out.printf("%-20s %.2f L/s (dam %.2fx)%n", entry.getKey(), state.currentFlow(), state.damFactor);
+            System.out.printf("%-20s %.2f L/s (dam %.2fx, level %.2f m3)%n",
+                    entry.getKey(), state.currentFlow(), state.damFactor, state.damLevel);
         }
     }
 
-    private static class RiverState {
+    public static class RiverState {
         private double intrinsicFlow = 0.0;
         private double incomingFlow = 0.0;
         private double damFactor = 1.0;
+        private double damLevel = 0.0;
+
+        void startDay() {
+            intrinsicFlow = 0.0;
+            incomingFlow = 0.0;
+            damFactor = 1.0;
+        }
 
         void setIntrinsicFlow(double flow) {
             intrinsicFlow = flow;
-            incomingFlow = 0.0;
         }
 
         void addIncomingFlow(double flow) {
@@ -300,8 +337,16 @@ public class Interpreter implements Expr.Visitor<Object>, Stmt.Visitor<Void> {
             damFactor = factor;
         }
 
+        void updateDamLevel(double delta) {
+            damLevel = Math.max(0.0, damLevel + delta);
+        }
+
+        double inflow() {
+            return intrinsicFlow + incomingFlow;
+        }
+
         double currentFlow() {
-            return (intrinsicFlow + incomingFlow) * damFactor;
+            return inflow() * damFactor;
         }
     }
 }
